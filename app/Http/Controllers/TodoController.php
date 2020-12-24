@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Todo;
 use App\Http\Resources\TodoResource;
 use Illuminate\Support\Facades\Validator;
+use phpDocumentor\Reflection\Types\Integer;
 
 class TodoController extends Controller
 {
@@ -45,9 +46,9 @@ class TodoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Todo $todo)
     {
-        //
+        return response (new TodoResource($todo), 200);
     }
 
     /**
@@ -57,9 +58,18 @@ class TodoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Todo $todo)
     {
-        //
+        $validate = Validator::make($request->toArray(),[
+            'name' => 'required',
+            'status' => 'required'
+        ]);
+        if($validate->fails()){
+            return response(new TodoResource($todo), 200);
+        }
+
+        $todo->update($validate->validate());
+        return response(new TodoResource($todo), 201);
     }
 
     /**
@@ -68,8 +78,9 @@ class TodoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Todo $todo)
     {
-        //
+        $todo->delete();
+        return response(null, 204);
     }
 }
